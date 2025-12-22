@@ -731,3 +731,272 @@ Amazon EC2 offers several purchasing options to optimize costs:
 5. **Dedicated Hosts**: Full physical servers for your instances.
 6. **Dedicated Instances**: Single-tenant instances.
 7. **Capacity Reservations**: Reserve capacity in specific AZs.
+
+
+---
+## **EBS Volumes and Its Types**
+
+Amazon Elastic Block Store (EBS) provides persistent block storage for use with Amazon EC2 instances. These volumes are highly available, reliable, and scalable.
+
+### **Types of EBS Volumes**
+
+1. **General Purpose SSD (gp3, gp2)**
+   - Ideal for a wide range of workloads, including boot volumes, dev/test environments, and low-latency interactive apps.
+   - **gp3** offers predictable IOPS and lower costs compared to **gp2**.
+
+2. **Provisioned IOPS SSD (io1, io2)**
+   - Designed for I/O-intensive applications, such as databases.
+   - Offers high durability and supports features like Multi-Attach.
+
+3. **Throughput Optimized HDD (st1)**
+   - Suitable for frequently accessed, throughput-intensive workloads such as big data and log processing.
+
+4. **Cold HDD (sc1)**
+   - Ideal for infrequently accessed workloads, such as backups and archiving.
+
+5. **Magnetic (Standard)**
+   - Suitable for workloads where data is infrequently accessed.
+
+[Refer to AWS EBS Volume Types Documentation](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ebs-volume-types.html)
+
+---
+
+## **Attach Volumes, Create Partition, and Mount**
+
+### **Attaching an EBS Volume to an EC2 Instance**
+1. Go to the **EC2 Dashboard** on the AWS Management Console.
+2. Select **Volumes** from the left menu.
+3. Choose the volume you want to attach and click **Actions > Attach Volume**.
+4. Select the instance to attach the volume to and click **Attach**.
+
+### **Creating a Partition**
+1. SSH into the EC2 instance to which the volume was attached.
+2. Use the `lsblk` command to list all block devices and confirm the new volume is attached (e.g., `/dev/xvdf`).
+3. Create a partition on the volume using the `fdisk` command:
+   ```bash
+   sudo fdisk /dev/xvdf
+   ```
+   - Press `n` to create a new partition.
+   - Follow the prompts and press `w` to write changes.
+4. Format the partition:
+   ```bash
+   sudo mkfs.ext4 /dev/xvdf1
+   ```
+
+### **Mounting the Volume**
+1. Create a mount directory:
+   ```bash
+   sudo mkdir /mnt/ebs-volume
+   ```
+2. Mount the volume:
+   ```bash
+   sudo mount /dev/xvdf1 /mnt/ebs-volume
+   ```
+3. Verify the volume is mounted:
+   ```bash
+   df -h
+   ```
+
+### **Persisting the Mount (Optional)**
+To make the mount persistent across reboots:
+1. Open the `/etc/fstab` file:
+   ```bash
+   sudo nano /etc/fstab
+   ```
+2. Add the following entry:
+   ```bash
+   /dev/xvdf1   /mnt/ebs-volume   ext4   defaults,nofail   0   2
+   ```
+3. Save the file and exit.
+4. Test the configuration:
+   ```bash
+   sudo mount -a
+   ```
+
+---
+
+## **Summary**
+
+- **EBS Volumes**: Provide persistent, reliable block storage.
+- **Volume Types**: Include SSDs (gp3, gp2, io1, io2), HDDs (st1, sc1), and magnetic storage.
+- **Operations**: Attach a volume, create partitions, format, and mount it to an EC2 instance.
+
+----
+## **Taking Backup Using Snapshots**
+
+### **Manual Snapshot Creation**
+1. Navigate to the **EC2 Dashboard** on the AWS Management Console.
+2. Select **Volumes** from the left-hand menu.
+3. Choose the volume to back up and click **Actions > Create Snapshot**.
+4. Provide a description for the snapshot and click **Create Snapshot**.
+5. To view snapshots, navigate to **Snapshots** in the EC2 Dashboard.
+
+
+## **Automating Snapshots Using Snapshot Policies**
+
+### **Create a Snapshot Lifecycle Policy**
+1. Navigate to the **Amazon Data Lifecycle Manager (DLM)** in the AWS Management Console.
+2. Click **Create lifecycle policy**.
+3. Select **EBS Snapshot policy**.
+4. Configure policy details:
+   - Select resource type as **Volume**.
+   - Add tags to identify the volumes to be included in the policy (e.g., `Environment:Production`).
+5. Define a schedule:
+   - Specify the frequency of snapshots (e.g., daily).
+   - Define a retention period (e.g., retain snapshots for 7 days).
+6. Review and create the policy.
+
+
+## **Summary**
+
+- **Partition Management**: Create and persist partitions using `fstab`.
+- **Snapshots**: Manual and CLI-based snapshot creation.
+- **Automation**: Implement lifecycle policies for scheduled backups.
+
+---
+
+
+# 📌 Introduction to NFS  
+
+## 🔹 What is NFS?  
+- **NFS = Network File System**  
+- It is a way for computers to **share files over a network**.  
+- Think of it like **Google Drive or OneDrive**, but for servers inside a network.  
+- With NFS, you can create one storage location and let **multiple computers (clients)** connect and use it as if it were their own local disk.  
+
+---
+
+## 🔹 How does it work?  
+- Two main parts:  
+  1. **NFS Server** → The machine that has the actual storage and shares it.  
+  2. **NFS Clients** → Other machines that connect to the server and access files.  
+
+- Clients mount (attach) the shared folder and can **read/write files** just like a normal folder.  
+
+---
+
+## 🔹 Real-life Example  
+- Imagine a company office:  
+  - The **NFS Server** is like the office filing cabinet.  
+  - Employees (clients) don’t keep their own copies, they just **open the same cabinet drawer** and work on the same files.  
+  - If one person updates a document, everyone sees the update instantly.  
+
+---
+
+## 🔹 Key Features of NFS  
+1. **Centralized Storage** – Files are stored in one place, not scattered across machines.  
+2. **Shared Access** – Multiple servers can access the same data.  
+3. **Scalability** – Add more clients without copying files everywhere.  
+4. **Transparency** – To the client, it looks like a normal folder/directory.  
+5. **Uses TCP/UDP Port 2049** – Default port for NFS communication.  
+
+---
+
+## 🔹 Why do we need NFS?  
+- Without NFS: Every server would have its **own local files**, making it difficult to share or sync data.  
+- With NFS: All servers point to the **same storage**, making collaboration and scaling easier.  
+
+**Use Cases:**  
+- Hosting a website on multiple servers → all servers can use **same images, code, or logs** from NFS.  
+- In AWS → **EFS (Elastic File System)** is Amazon’s managed NFS service.  
+
+---
+
+## 🔹 Versions of NFS  
+- **NFSv2** – Old version, basic sharing.  
+- **NFSv3** – Supports large files, better performance.  
+- **NFSv4** – Latest, more secure (supports encryption, ACLs).  
+- AWS EFS uses **NFSv4.1** by default.  
+
+---
+
+# 📌 NFS in AWS Context  
+
+### Is NFS Region-specific or AZ-specific?  
+
+- **NFS (general protocol)** → Not tied to region/AZ, depends only on network reachability.  
+
+- **Amazon EFS (managed NFS)**:  
+  - **Region-specific** → An EFS file system exists only in one AWS region.  
+  - **Multi-AZ** → Data is stored across multiple Availability Zones within that region.  
+  - Instances in different AZs of the same region can mount the same EFS file system.  
+
+---
+
+## ✅ Quick Summary  
+- **NFS protocol** → Not tied to region/AZ, just needs network connectivity.  
+- **AWS EFS** →  
+  - Region-specific.  
+  - Multi-AZ within that region for high availability.  
+
+👉 In AWS terms:  
+**EFS is region-specific, but can be accessed from multiple AZs within that region.**
+
+---
+
+# 📌 Practical: Create and Mount Amazon EFS (NFS)
+
+## 🔹 Step 1: Create EFS File System  
+1. Open **Amazon EFS** in AWS Console.  
+2. Click **Create file system**.  
+3. Configure:  
+   - **Name**: `my-efs`  
+   - **VPC**: Select your VPC  
+   - **AZs/Subnets**: Choose subnets (for high availability, select multiple AZs).  
+4. **Security Groups**: Allow **NFS traffic (port 2049)**.  
+5. Click **Create**.  
+
+---
+
+## 🔹 Step 2: Install NFS Utilities on EC2 Instances  
+
+For **Amazon Linux**:  
+```bash
+sudo yum install -y amazon-efs-utils
+```
+# AWS EFS Practical Guide  
+
+## 🔹 Step 1: Create an EFS File System  
+
+1. Go to the **AWS Management Console → EFS**.  
+2. Click **Create file system**.  
+3. Select your **VPC** and Availability Zones (AZs).  
+4. Attach **Mount Targets** in each AZ (linked to Subnets & Security Groups).  
+5. Set **Performance mode** (General Purpose or Max I/O).  
+6. Enable **Encryption** (recommended).  
+7. Click **Create**.  
+
+---
+
+## 🔹 Step 2: Install NFS Utilities on EC2 Instances  
+
+For **Ubuntu/Debian**:  
+```bash
+sudo apt-get update
+sudo apt-get install -y nfs-common
+```
+**For Amazon Linux / RHEL / CentOS**
+```sh
+sudo yum install -y amazon-efs-utils
+sudo yum install -y nfs-utils
+```
+**🔹 Step 3: Mount the EFS File System**
+
+1.Get your EFS File System ID (e.g., fs-12345678) from the AWS console.
+2.Create a mount point:
+```sh
+sudo mkdir -p /mnt/efs
+```
+**using NFS protocol**
+```sh
+sudo mount -t nfs4 -o nfsvers=4.1 fs-12345678.efs.us-east-1.amazonaws.com:/ /mnt/efs
+```
+**to mount**
+```sh
+systemctl daemon-reload
+mount -a
+```
+**to verify**
+```sh
+df -h
+```
