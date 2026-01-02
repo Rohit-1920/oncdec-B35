@@ -1000,3 +1000,388 @@ mount -a
 ```sh
 df -h
 ```
+# Basics of Networking
+
+Networking is the backbone of modern computing and communication systems. It involves connecting devices to share resources, data, and information efficiently. Key components and concepts of networking include:
+
+## Key Networking Components:
+1. **IP Address (Internet Protocol Address):** A unique identifier assigned to each device on a network. It can be IPv4 (e.g., 192.168.1.1) or IPv6 (e.g., 2001:0db8:85a3:0000:0000:8a2e:0370:7334).
+
+2. **Subnet Mask:** Defines the network and host portions of an IP address. For example, in IPv4, a subnet mask of 255.255.255.0 allows 256 total addresses, of which one is for the network and one for broadcast.
+
+3. **Gateway:** A node that routes traffic from one network to another, typically connecting a private network to the internet.
+
+4. **DNS (Domain Name System):** Translates human-readable domain names (e.g., www.example.com) into IP addresses.
+
+5. **MAC Address (Media Access Control):** A hardware address that identifies devices within a local network.
+
+## Types of Networks:
+- **LAN (Local Area Network):** Small networks, typically within a single location, such as a home or office.
+- **WAN (Wide Area Network):** Large networks spanning geographic locations, such as the internet.
+- **VLAN (Virtual Local Area Network):** Logical segmentation of a LAN for better management and security.
+
+## Networking Protocols:
+1. **TCP/IP (Transmission Control Protocol/Internet Protocol):** Core protocol suite for communication over the internet.
+2. **HTTP/HTTPS:** Protocols for transferring hypertext data (webpages).
+3. **FTP (File Transfer Protocol):** For transferring files over a network.
+4. **SSH (Secure Shell):** For secure remote administration.
+
+---
+
+# CIDR (Classless Inter-Domain Routing)
+
+## What is CIDR?
+Classless Inter-Domain Routing (CIDR) is a method for efficiently allocating IP addresses and routing data. It replaces the older class-based IP addressing system (Class A, B, and C).
+
+## CIDR Notation:
+CIDR uses a suffix to specify the number of significant bits in the subnet mask. The format is:
+
+```
+IP Address/Prefix Length
+```
+For example:
+- `192.168.1.0/24` means the first 24 bits are for the network, and the remaining 8 bits are for hosts.
+
+## CIDR Example:
+### Given `192.168.1.0/24`:
+- **Subnet Mask:** 255.255.255.0
+- **Total IPs:** 256 (2^8 for the last octet)
+- **Usable IPs:** 254 (Subtract 1 for the network and 1 for broadcast address)
+- **Range:** 192.168.1.1 to 192.168.1.254
+
+## Benefits of CIDR:
+1. **Efficient IP Address Allocation:** Prevents waste by allowing subnets of variable sizes.
+2. **Improved Routing Efficiency:** Reduces the size of routing tables by grouping multiple networks under a single prefix.
+3. **Scalability:** Supports hierarchical network design for better scalability.
+
+## Practical Steps:
+
+### Step 1: Understand Your Network Requirements
+- Determine the number of hosts and subnets needed.
+- Choose an IP range and prefix length that accommodates your needs.
+
+### Step 2: Subnetting
+- Use tools like subnet calculators or calculate manually.
+- Example: Subnet `192.168.1.0/24` into smaller subnets like `192.168.1.0/26` and `192.168.1.64/26`.
+
+### Step 3: Configure Networking Devices
+- Assign IP addresses, subnet masks, and gateways to devices.
+- Update DNS records as needed.
+
+### Step 4: Verify Network Configuration
+- Use commands like `ping`, `traceroute`, and `nslookup` to test connectivity and resolve issues.
+
+---
+
+## Better understanding Refer Below PDF.
+
+[View the PDF](images/Notes_%20Networks,%20Subnets,%20and%20CIDR.pdf)
+
+---
+
+# Introduction to VPC
+
+## What is a VPC?
+Amazon Virtual Private Cloud (VPC) allows you to launch AWS resources in a logically isolated network that you define. You have complete control over your virtual networking environment, including selecting your own IP address range, creating subnets, and configuring route tables and gateways.
+
+### Key Features of a VPC:
+- **Logical Isolation:** Operates within a region, providing control over network setup.
+- **Subnets:** Divide your VPC into smaller segments based on your requirements.
+- **Security:** Use security groups and network ACLs for fine-grained control.
+- **Internet Gateway:** Attach to a VPC for internet access.
+- **Private Connectivity:** Use VPN or Direct Connect to connect on-premises environments.
+- **Elastic IPs:** Assign static IP addresses to resources in your VPC.
+
+### VPC Types:
+1. **Default VPC:** Automatically created by AWS in each region. It includes a public subnet in each Availability Zone, enabling immediate access to AWS services.
+2. **Custom VPC:** Created manually to meet specific networking requirements, offering full control over the network configuration.
+
+### Reserved IPs in AWS:
+Within each subnet's CIDR block, AWS reserves the following IP addresses:
+- **.0:** Network address.
+- **.1:** Reserved by AWS for the VPC router.
+- **.2:** Reserved for mapping Amazon-provided DNS.
+- **.3:** Reserved for future use.
+- **Last IP:** Reserved for the network broadcast address. 
+
+For example, in a `/24` subnet (`192.168.1.0/24`):
+- Reserved IPs: `192.168.1.0`, `192.168.1.1`, `192.168.1.2`, `192.168.1.3`, and `192.168.1.255`.
+
+---
+
+# CIDR Calculation for Subnets
+
+## What is CIDR?
+Classless Inter-Domain Routing (CIDR) is a method for allocating IP addresses and routing. Instead of using the traditional class-based system, CIDR allows IP ranges to be split into subnets with flexible sizes.
+
+### CIDR Notation:
+A CIDR block is expressed as `IP address/prefix length`. For example, `192.168.0.0/24`:
+- **192.168.0.0**: Network portion.
+- **/24**: Indicates that the first 24 bits represent the network, leaving 8 bits for host addresses.
+
+### Subnetting Calculation:
+1. **Determine the Number of Hosts:**
+   - Formula: `2^(32 - prefix length) - 2`
+   - Example: `/24` = `2^(32 - 24) - 2 = 254 usable hosts`
+
+2. **Divide a Larger Block:**
+   - Example: To split `10.0.0.0/16` into four subnets, increase the prefix length to `/18`. Resulting subnets:
+     - `10.0.0.0/18`
+     - `10.0.64.0/18`
+     - `10.0.128.0/18`
+     - `10.0.192.0/18`
+
+### Practical Example:
+- **Base CIDR:** `10.0.0.0/16`
+- **Required Subnets:** 4
+- **Step:** Adjust prefix length to `/18` to accommodate each subnet.
+
+---
+
+# Create VPC and Subnet
+
+## Step-by-Step Guide:
+
+### Create a VPC:
+1. Log in to the **AWS Management Console**.
+2. Navigate to **VPC Dashboard**.
+3. Click **Create VPC**.
+4. Provide details:
+   - **Name:** MyVPC
+   - **IPv4 CIDR Block:** `10.0.0.0/16`
+   - Enable DNS settings if required.
+5. Click **Create VPC**.
+
+### Create a Subnet:
+1. Go to the **Subnets** section in the VPC Dashboard.
+2. Click **Create Subnet**.
+3. Select your VPC (e.g., `MyVPC`).
+4. Specify details:
+   - **Name:** PublicSubnet
+   - **Availability Zone:** Choose an AZ (e.g., us-east-1a).
+   - **CIDR Block:** `10.0.0.0/24`
+5. Click **Create Subnet**.
+
+### Verify:
+1. Go to the **VPC Dashboard**.
+2. Confirm that your VPC and Subnet appear in the list.
+3. Associate your subnet with a route table if necessary.
+
+---
+
+
+## 1. Create an Internet Gateway (IGW) and Route
+
+### What is an IGW?
+An Internet Gateway is a horizontally scaled, highly available, and redundant VPC component that allows communication between instances in your VPC and the internet.
+
+### Steps to Create an IGW and Attach to VPC:
+1. **Navigate to the AWS Management Console:**
+   - Go to the "VPC" section.
+
+2. **Create an Internet Gateway:**
+   - Select "Internet Gateways" from the left-hand menu.
+   - Click "Create internet gateway."
+   - Provide a name for the IGW (optional).
+   - Click "Create internet gateway."
+
+3. **Attach the IGW to a VPC:**
+   - Select the IGW you just created.
+   - Click "Actions" → "Attach to VPC."
+   - Select the desired VPC from the dropdown list.
+   - Click "Attach internet gateway."
+
+### Create a Route Table and Associate with Subnets:
+1. **Navigate to Route Tables:**
+   - Under the "VPC" dashboard, click "Route Tables."
+
+2. **Create a Route for Internet Access:**
+   - Select the route table associated with the public subnet.
+   - Click on the "Routes" tab and "Edit routes."
+   - Add a route:
+     - **Destination:** `0.0.0.0/0`
+     - **Target:** Select the Internet Gateway ID.
+   - Click "Save routes."
+
+3. **Associate the Route Table with the Subnet:**
+   - Go to the "Subnet Associations" tab.
+   - Click "Edit subnet associations."
+   - Select the public subnet.
+   - Click "Save."
+
+## 2. Launch Private and Public Instances
+
+### Public Instance:
+1. **Ensure Public Subnet Configuration:**
+   - Verify that the subnet is associated with a route table pointing to an Internet Gateway.
+
+2. **Launch an EC2 Instance:**
+   - Navigate to the EC2 dashboard.
+   - Click "Launch Instance."
+   - Select an AMI (e.g., Amazon Linux 2).
+   - Choose an instance type.
+   - In the "Configure Instance" step, select the public subnet.
+   - Enable "Auto-assign Public IP."
+   - Add storage and tags as needed.
+   - Configure a security group to allow SSH (port 22).
+   - Launch the instance.
+
+### Private Instance:
+1. **Ensure Private Subnet Configuration:**
+   - The subnet should not be associated with a route to an Internet Gateway.
+
+2. **Launch an EC2 Instance:**
+   - Follow the same steps as for a public instance.
+   - In the "Configure Instance" step, select the private subnet.
+   - Ensure "Auto-assign Public IP" is disabled.
+
+
+## 3. NAT Gateway
+
+### What is a NAT Gateway?
+A Network Address Translation (NAT) Gateway enables instances in a private subnet to access the internet while preventing unsolicited inbound traffic from the internet.
+
+### Steps to Create a NAT Gateway:
+1. **Navigate to NAT Gateways:**
+   - Under the "VPC" section, click "NAT Gateways."
+
+2. **Create a NAT Gateway:**
+   - Click "Create NAT gateway."
+   - Select the public subnet.
+   - Allocate an Elastic IP (EIP) for the NAT Gateway.
+   - Click "Create NAT gateway."
+
+3. **Update Route Table for Private Subnet:**
+   - Go to "Route Tables."
+   - Select the route table associated with the private subnet.
+   - Click on the "Routes" tab and "Edit routes."
+   - Add a route:
+     - **Destination:** `0.0.0.0/0`
+     - **Target:** Select the NAT Gateway ID.
+   - Click "Save routes."
+
+
+## 4. VPC Peering
+
+### What is VPC Peering?
+VPC Peering is a networking connection between two VPCs that enables you to route traffic between them using private IP addresses.
+
+### Steps to Create a VPC Peering Connection:
+1. **Create a Peering Connection:**
+   - Navigate to the "VPC" dashboard.
+   - Click "Peering Connections."
+   - Click "Create peering connection."
+   - Provide a name for the connection.
+   - Select the requester VPC and the accepter VPC (can be in the same or different AWS accounts).
+   - Click "Create peering connection."
+
+2. **Accept the Peering Connection:**
+   - If the accepter VPC is in the same account:
+     - Select the peering connection.
+     - Click "Actions" → "Accept request."
+   - If in a different account, log in to the other account, navigate to "Peering Connections," and accept the request.
+
+3. **Update Route Tables for Communication:**
+   - Go to "Route Tables" in both VPCs.
+   - Edit the routes to allow traffic to the CIDR block of the peer VPC.
+
+4. **Update Security Groups:**
+   - Ensure security group rules allow traffic between instances in the peered VPCs.
+
+---
+
+# Networking, Elastic IPs, Placement Groups, and Security
+
+## NIC (Network Interface Controller) and Elastic IP
+
+### NIC (Network Interface Controller)
+A Network Interface Controller (NIC) in AWS is also referred to as an Elastic Network Interface (ENI). It is a virtual network interface that you can attach to an instance in a Virtual Private Cloud (VPC). ENIs provide network connectivity for instances and include attributes such as a private IPv4 address, an IPv6 address (optional), security groups, a MAC address, and a source/destination check flag.
+
+#### Key Features of NIC:
+- **Primary Network Interface**: Automatically created with every instance and cannot be detached.
+- **Secondary Network Interfaces**: Can be attached or detached from instances, offering flexibility in multi-network configurations.
+- **Custom Configuration**: Security groups, IP addresses, and MAC addresses can be customized.
+
+#### Practical Steps to Manage ENIs:
+1. Navigate to the **EC2 Dashboard** in the AWS Management Console.
+2. Select **Network Interfaces** from the left-hand menu.
+3. Create a new ENI by providing the VPC, Subnet, and security group details.
+4. Attach the ENI to an instance from the **Actions** menu.
+
+### Elastic IP
+An Elastic IP (EIP) is a static IPv4 address designed for dynamic cloud computing. You can associate an EIP with your instance or ENI to allow external internet access.
+
+#### Key Features of Elastic IP:
+- **Static**: Remains unchanged unless manually released.
+- **Reassignable**: Can be reassigned between instances in your account.
+- **One Free IP**: AWS provides one Elastic IP per account without cost if it is associated with a running instance.
+
+#### Practical Steps to Assign an Elastic IP:
+1. Go to the **EC2 Dashboard** in the AWS Management Console.
+2. Select **Elastic IPs** from the left-hand menu.
+3. Click **Allocate Elastic IP address**.
+4. Associate the EIP with an instance or network interface.
+
+---
+
+## Placement Groups
+AWS Placement Groups are logical groupings of instances that allow applications to meet specific performance or redundancy requirements.
+
+### Types of Placement Groups:
+1. **Cluster Placement Group**:
+   - Instances are placed close together within a single Availability Zone.
+   - High throughput and low latency.
+   - Ideal for HPC (High-Performance Computing) and big data workloads.
+
+2. **Spread Placement Group**:
+   - Instances are placed across different hardware within an Availability Zone.
+   - Increases fault tolerance.
+   - Ideal for small critical workloads.
+
+3. **Partition Placement Group**:
+   - Instances are divided into logical partitions.
+   - Each partition is isolated from others.
+   - Used for large distributed and replicated workloads such as HDFS, HBase, and Cassandra.
+
+#### Practical Steps to Create a Placement Group:
+1. Open the **EC2 Dashboard** in the AWS Management Console.
+2. Select **Placement Groups** from the left-hand menu.
+3. Click **Create Placement Group** and provide a name.
+4. Choose the type of placement group and add the instances during or after creation.
+
+---
+
+## NACL (Network Access Control List) vs Security Group
+
+### NACL (Network Access Control List):
+- Acts as a firewall for controlling traffic in and out of one or more subnets.
+- Operates at the subnet level.
+- **Stateless**: Rules need to be explicitly defined for both inbound and outbound traffic.
+- Supports rules by rule number with allow and deny actions.
+
+### Security Group:
+- Acts as a firewall for controlling traffic to and from an instance.
+- Operates at the instance level.
+- **Stateful**: Automatically allows responses to inbound traffic.
+- Only supports allow rules.
+
+### Key Differences:
+| Feature                | NACL                         | Security Group             |
+|------------------------|------------------------------|----------------------------|
+| Scope                  | Subnet-level                 | Instance-level             |
+| State                  | Stateless                    | Stateful                   |
+| Rule Actions           | Allow and Deny               | Allow only                 |
+| Default Behavior       | Allows all traffic by default| Denies all traffic by default|
+
+#### Practical Steps to Manage NACL:
+1. Navigate to the **VPC Dashboard** in the AWS Management Console.
+2. Select **Network ACLs** from the left-hand menu.
+3. Create a new NACL and associate it with subnets.
+4. Add inbound and outbound rules as required.
+
+#### Practical Steps to Manage Security Groups:
+1. Open the **EC2 Dashboard**.
+2. Select **Security Groups** from the left-hand menu.
+3. Create a new security group by specifying rules for inbound and outbound traffic.
+4. Attach the security group to instances during or after launch.
+
